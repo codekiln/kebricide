@@ -21,27 +21,28 @@ const state = {
   trackIds: [] as number[],
 }
 
-function getTrackIds(parentTrack: LiveAPI) {
+function getTracks() {
   const api = new LiveAPI(() => {}, 'live_set')
   const trackCount = api.getcount('tracks')
   //log('TRACK COUNT: ' + trackCount)
-  const childIds: number[] = []
+  const tracks: LiveAPI[] = []
 
   for (let index = 0; index < trackCount; index++) {
     api.path = 'live_set tracks ' + index
-
-    childIds.push(api.id)
+    const trackApi = new LiveAPI(() => {}, api.path)
+    tracks.push(trackApi)
   }
 
-  return childIds
+  return tracks
 }
 
 function initialize() {
-  //log('INITIALIZE')
-  const thisDevice = new LiveAPI(() => {}, 'live_set this_device')
-
-  state.trackIds = getTrackIds(thisDevice)
-  log('CHILD_IDS: ' + state.trackIds)
+  const tracks = getTracks()
+  
+  tracks.forEach((track, index) => {
+    const name = track.get('name')
+    log(`Track ${index}: ${name}`)
+  })
 }
 
 initialize()

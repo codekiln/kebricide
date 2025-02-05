@@ -15,22 +15,24 @@ log('reloaded');
 var state = {
     trackIds: [],
 };
-function getTrackIds(parentTrack) {
+function getTracks() {
     var api = new LiveAPI(function () { }, 'live_set');
     var trackCount = api.getcount('tracks');
     //log('TRACK COUNT: ' + trackCount)
-    var childIds = [];
+    var tracks = [];
     for (var index = 0; index < trackCount; index++) {
         api.path = 'live_set tracks ' + index;
-        childIds.push(api.id);
+        var trackApi = new LiveAPI(function () { }, api.path);
+        tracks.push(trackApi);
     }
-    return childIds;
+    return tracks;
 }
 function initialize() {
-    //log('INITIALIZE')
-    var thisDevice = new LiveAPI(function () { }, 'live_set this_device');
-    state.trackIds = getTrackIds(thisDevice);
-    log('CHILD_IDS: ' + state.trackIds);
+    var tracks = getTracks();
+    tracks.forEach(function (track, index) {
+        var name = track.get('name');
+        log("Track ".concat(index, ": ").concat(name));
+    });
 }
 initialize();
 // NOTE: This section must appear in any .ts file that is directuly used by a
