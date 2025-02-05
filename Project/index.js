@@ -6,15 +6,15 @@ var config = {
     outputLogs: true,
 };
 var utils_1 = require("./utils");
-var log = (0, utils_1.logFactory)(config);
+var logger = (0, utils_1.logFactory)(config);
 var INLET_FOO = 0;
 var OUTLET_FOO = 0;
 setinletassist(INLET_FOO, 'Description of Inlet');
 setoutletassist(OUTLET_FOO, 'Description of Outlet');
-log('reloaded');
-var state = {
-    trackIds: [],
-};
+(0, utils_1.logReload)(logger);
+// const state = {
+//   trackIds: [] as number[],
+// }
 function getTracks() {
     var api = new LiveAPI(function () { }, 'live_set');
     var trackCount = api.getcount('tracks');
@@ -30,28 +30,39 @@ function getTracks() {
 function getClips(track) {
     var clipSlots = [];
     var clipSlotCount = track.getcount('clip_slots');
+    var basePath = track.path;
     for (var slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
-        track.path = "".concat(track.path, " clip_slots ").concat(slotIndex);
-        var clipSlot = new LiveAPI(function () { }, track.path);
+        // Build complete path for this iteration
+        var clipSlotPath = "".concat(basePath, " clip_slots ").concat(slotIndex);
+        var clipSlot = new LiveAPI(function () { }, clipSlotPath);
         // Check if slot has a clip
         if (clipSlot.get('has_clip')) {
-            track.path = "".concat(track.path, " clip");
-            var clip = new LiveAPI(function () { }, track.path);
+            var clipPath = "".concat(clipSlotPath, " clip");
+            var clip = new LiveAPI(function () { }, clipPath);
             clipSlots.push(clip);
         }
     }
     return clipSlots;
 }
 function initialize() {
+    logger('initialize');
     var tracks = getTracks();
     tracks.forEach(function (track, index) {
         var name = track.get('name');
-        log("Track ".concat(index, ": ").concat(name));
+        logger("Track ".concat(index, ": ").concat(name));
         var clips = getClips(track);
-        log("Track ".concat(index, " has ").concat(clips.length, " clips"));
+        logger("Track ".concat(index, " has ").concat(clips.length, " clips"));
     });
 }
-initialize();
+function compile() {
+    logger('COMPILE');
+    initialize();
+}
+function bang() {
+    logger('BANG');
+    initialize();
+}
+logger('RELOADED END');
 // NOTE: This section must appear in any .ts file that is directuly used by a
 // [js] or [jsui] object so that tsc generates valid JS for Max.
 var module = {};

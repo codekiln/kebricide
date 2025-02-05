@@ -6,8 +6,8 @@ const config = {
   outputLogs: true,
 }
 
-import { logFactory } from './utils'
-const log = logFactory(config)
+import { logFactory, logReload } from './utils'
+const logger = logFactory(config)
 
 const INLET_FOO = 0
 const OUTLET_FOO = 0
@@ -15,11 +15,11 @@ const OUTLET_FOO = 0
 setinletassist(INLET_FOO, 'Description of Inlet')
 setoutletassist(OUTLET_FOO, 'Description of Outlet')
 
-log('reloaded')
+logReload(logger)
 
-const state = {
-  trackIds: [] as number[],
-}
+// const state = {
+//   trackIds: [] as number[],
+// }
 
 function getTracks() {
   const api = new LiveAPI(() => {}, 'live_set')
@@ -39,15 +39,17 @@ function getTracks() {
 function getClips(track: LiveAPI): LiveAPI[] {
   const clipSlots: LiveAPI[] = []
   const clipSlotCount = track.getcount('clip_slots')
+  const basePath = track.path
   
   for (let slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
-    track.path = `${track.path} clip_slots ${slotIndex}`
-    const clipSlot = new LiveAPI(() => {}, track.path)
+    // Build complete path for this iteration
+    const clipSlotPath = `${basePath} clip_slots ${slotIndex}`
+    const clipSlot = new LiveAPI(() => {}, clipSlotPath)
     
     // Check if slot has a clip
     if (clipSlot.get('has_clip')) {
-      track.path = `${track.path} clip`
-      const clip = new LiveAPI(() => {}, track.path)
+      const clipPath = `${clipSlotPath} clip`
+      const clip = new LiveAPI(() => {}, clipPath)
       clipSlots.push(clip)
     }
   }
@@ -56,18 +58,28 @@ function getClips(track: LiveAPI): LiveAPI[] {
 }
 
 function initialize() {
+  logger('initialize')
   const tracks = getTracks()
   
   tracks.forEach((track, index) => {
     const name = track.get('name')
-    log(`Track ${index}: ${name}`)
+    logger(`Track ${index}: ${name}`)
     
     const clips = getClips(track)
-    log(`Track ${index} has ${clips.length} clips`)
+    logger(`Track ${index} has ${clips.length} clips`)
   })
 }
 
-initialize()
+function compile() {
+  logger('COMPILE')
+  initialize()
+}
+
+function bang() {
+  logger('BANG')
+  initialize()
+}
+logger('RELOADED END')
 
 // NOTE: This section must appear in any .ts file that is directuly used by a
 // [js] or [jsui] object so that tsc generates valid JS for Max.
