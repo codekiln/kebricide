@@ -27,11 +27,28 @@ function getTracks() {
     }
     return tracks;
 }
+function getClips(track) {
+    var clipSlots = [];
+    var clipSlotCount = track.getcount('clip_slots');
+    for (var slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
+        track.path = "".concat(track.path, " clip_slots ").concat(slotIndex);
+        var clipSlot = new LiveAPI(function () { }, track.path);
+        // Check if slot has a clip
+        if (clipSlot.get('has_clip')) {
+            track.path = "".concat(track.path, " clip");
+            var clip = new LiveAPI(function () { }, track.path);
+            clipSlots.push(clip);
+        }
+    }
+    return clipSlots;
+}
 function initialize() {
     var tracks = getTracks();
     tracks.forEach(function (track, index) {
         var name = track.get('name');
         log("Track ".concat(index, ": ").concat(name));
+        var clips = getClips(track);
+        log("Track ".concat(index, " has ").concat(clips.length, " clips"));
     });
 }
 initialize();

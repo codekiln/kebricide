@@ -36,12 +36,34 @@ function getTracks() {
   return tracks
 }
 
+function getClips(track: LiveAPI): LiveAPI[] {
+  const clipSlots: LiveAPI[] = []
+  const clipSlotCount = track.getcount('clip_slots')
+  
+  for (let slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
+    track.path = `${track.path} clip_slots ${slotIndex}`
+    const clipSlot = new LiveAPI(() => {}, track.path)
+    
+    // Check if slot has a clip
+    if (clipSlot.get('has_clip')) {
+      track.path = `${track.path} clip`
+      const clip = new LiveAPI(() => {}, track.path)
+      clipSlots.push(clip)
+    }
+  }
+
+  return clipSlots
+}
+
 function initialize() {
   const tracks = getTracks()
   
   tracks.forEach((track, index) => {
     const name = track.get('name')
     log(`Track ${index}: ${name}`)
+    
+    const clips = getClips(track)
+    log(`Track ${index} has ${clips.length} clips`)
   })
 }
 
