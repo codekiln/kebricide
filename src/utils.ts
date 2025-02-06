@@ -31,6 +31,14 @@ export function logReload(logger: (...args: any[]) => void) {
   logger("------------------------------------------------------------------")
 }
 
+/**
+ * Creates a wrapper around a LiveAPI instance that adds error handling and logging.
+ * This wrapper intercepts all common LiveAPI methods (get, set, call, goto) and 
+ * provides detailed error messages if they fail.
+ * 
+ * @param liveApi - The LiveAPI instance to wrap
+ * @returns A wrapped version of the LiveAPI instance with enhanced error handling
+ */
 export function createLiveApiWrapper(liveApi: LiveAPI) {
   // Store original methods we want to wrap
   const originalMethods = {
