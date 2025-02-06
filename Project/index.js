@@ -33,16 +33,17 @@ function getClips(track) {
     var basePath = track.unquotedpath;
     for (var slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
         var clipSlotPath = "".concat(basePath, " clip_slots ").concat(slotIndex);
-        var clipSlot = new LiveAPI(function () { }, clipSlotPath);
-        // Check if we got a valid object (id !== 0) before trying to use it
-        // see also https://docs.cycling74.com/legacy/max8/refpages/live.object#Messages
-        if (clipSlot && clipSlot.id !== 0 && clipSlot.get('has_clip')) {
-            var clipPath = "".concat(clipSlotPath, " clip");
-            var clip = new LiveAPI(function () { }, clipPath);
-            // Also check if the clip object is valid
-            if (clip && clip.id !== 0) {
+        try {
+            var clipSlot = (0, utils_1.createValidatedLiveApi)(clipSlotPath);
+            if (clipSlot.get('has_clip')) {
+                var clipPath = "".concat(clipSlotPath, " clip");
+                var clip = (0, utils_1.createValidatedLiveApi)(clipPath);
                 clipSlots.push(clip);
             }
+        }
+        catch (error) {
+            (0, utils_1.warn)("Error in getClips: ".concat(error.message));
+            // Continue to next iteration
         }
     }
     return clipSlots;

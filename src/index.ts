@@ -6,7 +6,7 @@ const config = {
   outputLogs: true,
 }
 
-import { logFactory, logReload } from './utils'
+import { logFactory, logReload, createValidatedLiveApi, warn } from './utils'
 const logger = logFactory(config)
 
 const INLET_FOO = 0
@@ -43,17 +43,18 @@ function getClips(track: LiveAPI): LiveAPI[] {
   
   for (let slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
     const clipSlotPath = `${basePath} clip_slots ${slotIndex}`
-    const clipSlot = new LiveAPI(() => {}, clipSlotPath)
     
-    // Check if we got a valid object (id !== 0) before trying to use it
-    // see also https://docs.cycling74.com/legacy/max8/refpages/live.object#Messages
-    if (clipSlot && clipSlot.id !== 0 && clipSlot.get('has_clip')) {
-      const clipPath = `${clipSlotPath} clip`
-      const clip = new LiveAPI(() => {}, clipPath)
-      // Also check if the clip object is valid
-      if (clip && clip.id !== 0) {
+    try {
+      const clipSlot = createValidatedLiveApi(clipSlotPath)
+      
+      if (clipSlot.get('has_clip')) {
+        const clipPath = `${clipSlotPath} clip`
+        const clip = createValidatedLiveApi(clipPath)
         clipSlots.push(clip)
       }
+    } catch (error) {
+      warn(`Error in getClips: ${error.message}`)
+      // Continue to next iteration
     }
   }
 
