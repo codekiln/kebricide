@@ -35,14 +35,21 @@ function getClips(track) {
         var clipSlotPath = "".concat(basePath, " clip_slots ").concat(slotIndex);
         try {
             var clipSlot = (0, utils_1.createValidatedLiveApi)(clipSlotPath);
-            if (clipSlot.get('has_clip')) {
+            var hasClip = clipSlot.get('has_clip') === 1;
+            if (hasClip) {
                 var clipPath = "".concat(clipSlotPath, " clip");
-                var clip = (0, utils_1.createValidatedLiveApi)(clipPath);
-                clipSlots.push(clip);
+                try {
+                    var clip = (0, utils_1.createValidatedLiveApi)(clipPath);
+                    clipSlots.push(clip);
+                }
+                catch (error) {
+                    (0, utils_1.warn)("Error creating clip API object: ".concat(error.message));
+                    // Continue to next clip
+                }
             }
         }
         catch (error) {
-            (0, utils_1.warn)("Error in getClips: ".concat(error.message));
+            (0, utils_1.warn)("Error accessing clip slot ".concat(slotIndex, ": ").concat(error.message));
             // Continue to next iteration
         }
     }

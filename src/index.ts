@@ -46,14 +46,21 @@ function getClips(track: LiveAPI): LiveAPI[] {
     
     try {
       const clipSlot = createValidatedLiveApi(clipSlotPath)
+      const hasClip = clipSlot.get('has_clip') === 1
       
-      if (clipSlot.get('has_clip')) {
+      if (hasClip) {
         const clipPath = `${clipSlotPath} clip`
-        const clip = createValidatedLiveApi(clipPath)
-        clipSlots.push(clip)
+        
+        try {
+          const clip = createValidatedLiveApi(clipPath)
+          clipSlots.push(clip)
+        } catch (error) {
+          warn(`Error creating clip API object: ${error.message}`)
+          // Continue to next clip
+        }
       }
     } catch (error) {
-      warn(`Error in getClips: ${error.message}`)
+      warn(`Error accessing clip slot ${slotIndex}: ${error.message}`)
       // Continue to next iteration
     }
   }
