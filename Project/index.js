@@ -28,32 +28,25 @@ function getTracks() {
     return tracks;
 }
 function getClips(track) {
-    var clipSlots = [];
-    var clipSlotCount = track.getcount('clip_slots');
+    var clips = [];
+    var clipCount = track.getcount('arrangement_clips');
     var basePath = track.unquotedpath;
-    for (var slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
-        var clipSlotPath = "".concat(basePath, " clip_slots ").concat(slotIndex);
+    logger("Checking ".concat(clipCount, " arrangement clips"));
+    for (var clipIndex = 0; clipIndex < clipCount; clipIndex++) {
+        var clipPath = "".concat(basePath, " arrangement_clips ").concat(clipIndex);
         try {
-            var clipSlot = (0, utils_1.createValidatedLiveApi)(clipSlotPath);
-            var hasClip = clipSlot.get('has_clip') === 1;
-            if (hasClip) {
-                var clipPath = "".concat(clipSlotPath, " clip");
-                try {
-                    var clip = (0, utils_1.createValidatedLiveApi)(clipPath);
-                    clipSlots.push(clip);
-                }
-                catch (error) {
-                    (0, utils_1.warn)("Error creating clip API object: ".concat(error.message));
-                    // Continue to next clip
-                }
-            }
+            var clip = (0, utils_1.createValidatedLiveApi)(clipPath);
+            logger("Found clip ".concat(clipIndex, ":"));
+            logger("- name: ".concat(clip.get('name')));
+            logger("- length: ".concat(clip.get('length')));
+            clips.push(clip);
         }
         catch (error) {
-            (0, utils_1.warn)("Error accessing clip slot ".concat(slotIndex, ": ").concat(error.message));
+            (0, utils_1.warn)("Error accessing clip ".concat(clipIndex, ": ").concat(error.message));
             // Continue to next iteration
         }
     }
-    return clipSlots;
+    return clips;
 }
 function initialize() {
     logger('initialize');

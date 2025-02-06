@@ -37,35 +37,28 @@ function getTracks() {
 }
 
 function getClips(track: LiveAPI): LiveAPI[] {
-  const clipSlots: LiveAPI[] = []
-  const clipSlotCount = track.getcount('clip_slots')
+  const clips: LiveAPI[] = []
+  const clipCount = track.getcount('arrangement_clips')
   const basePath = track.unquotedpath
   
-  for (let slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
-    const clipSlotPath = `${basePath} clip_slots ${slotIndex}`
+  logger(`Checking ${clipCount} arrangement clips`)
+  
+  for (let clipIndex = 0; clipIndex < clipCount; clipIndex++) {
+    const clipPath = `${basePath} arrangement_clips ${clipIndex}`
     
     try {
-      const clipSlot = createValidatedLiveApi(clipSlotPath)
-      const hasClip = clipSlot.get('has_clip') === 1
-      
-      if (hasClip) {
-        const clipPath = `${clipSlotPath} clip`
-        
-        try {
-          const clip = createValidatedLiveApi(clipPath)
-          clipSlots.push(clip)
-        } catch (error) {
-          warn(`Error creating clip API object: ${error.message}`)
-          // Continue to next clip
-        }
-      }
+      const clip = createValidatedLiveApi(clipPath)
+      logger(`Found clip ${clipIndex}:`)
+      logger(`- name: ${clip.get('name')}`)
+      logger(`- length: ${clip.get('length')}`)
+      clips.push(clip)
     } catch (error) {
-      warn(`Error accessing clip slot ${slotIndex}: ${error.message}`)
+      warn(`Error accessing clip ${clipIndex}: ${error.message}`)
       // Continue to next iteration
     }
   }
 
-  return clipSlots
+  return clips
 }
 
 function initialize() {
