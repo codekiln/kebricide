@@ -15,10 +15,10 @@ export function logFactory({ outputLogs = true }) {
   return log;
 }
 
-export function warn() {
-  for(var i=0; i < arguments.length; i++) {
-    var s = String(arguments[i]);
-    error(s.indexOf("[object ") >= 0 ? JSON.stringify(arguments[i]) : s);
+export function warn(...args: any[]) {
+  for(let i=0; i < args.length; i++) {
+    const s = String(args[i]);
+    error(s.indexOf("[object ") >= 0 ? JSON.stringify(args[i]) : s);
   }
   error("\n");
 }
@@ -31,7 +31,7 @@ export function logReload(logger: (...args: any[]) => void) {
   logger("------------------------------------------------------------------")
 }
 
-export function createLiveApiWrapper(liveApi: any) {
+export function createLiveApiWrapper(liveApi: LiveAPI) {
   // Store original methods we want to wrap
   const originalMethods = {
     get: liveApi.get.bind(liveApi),

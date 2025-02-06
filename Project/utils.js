@@ -31,9 +31,13 @@ function logFactory(_a) {
 }
 exports.logFactory = logFactory;
 function warn() {
-    for (var i = 0; i < arguments.length; i++) {
-        var s = String(arguments[i]);
-        error(s.indexOf("[object ") >= 0 ? JSON.stringify(arguments[i]) : s);
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+    for (var i = 0; i < args.length; i++) {
+        var s = String(args[i]);
+        error(s.indexOf("[object ") >= 0 ? JSON.stringify(args[i]) : s);
     }
     error("\n");
 }
