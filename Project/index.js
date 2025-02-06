@@ -30,13 +30,15 @@ function getTracks() {
 function getClips(track) {
     var clipSlots = [];
     var clipSlotCount = track.getcount('clip_slots');
-    var basePath = track.path;
+    // if you use track.path instead of track.unquotedpath, you get a path with
+    // quotes around it, which won't play well with the path extension below
+    var basePath = track.unquotedpath;
     for (var slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
         // Build complete path for this iteration
         var clipSlotPath = "".concat(basePath, " clip_slots ").concat(slotIndex);
         var clipSlot = new LiveAPI(function () { }, clipSlotPath);
         // Check if slot has a clip
-        if (clipSlot.get('has_clip')) {
+        if (clipSlot && clipSlot.get('has_clip')) {
             var clipPath = "".concat(clipSlotPath, " clip");
             var clip = new LiveAPI(function () { }, clipPath);
             clipSlots.push(clip);

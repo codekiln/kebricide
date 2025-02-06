@@ -33,13 +33,15 @@ function getTracks() {
     tracks.push(trackApi)
   }
 
-  return tracks
+  return tracks 
 }
 
 function getClips(track: LiveAPI): LiveAPI[] {
   const clipSlots: LiveAPI[] = []
   const clipSlotCount = track.getcount('clip_slots')
-  const basePath = track.path
+  // if you use track.path instead of track.unquotedpath, you get a path with
+  // quotes around it, which won't play well with the path extension below
+  const basePath = track.unquotedpath
   
   for (let slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
     // Build complete path for this iteration
@@ -47,7 +49,7 @@ function getClips(track: LiveAPI): LiveAPI[] {
     const clipSlot = new LiveAPI(() => {}, clipSlotPath)
     
     // Check if slot has a clip
-    if (clipSlot.get('has_clip')) {
+    if (clipSlot && clipSlot.get('has_clip')) {
       const clipPath = `${clipSlotPath} clip`
       const clip = new LiveAPI(() => {}, clipPath)
       clipSlots.push(clip)
