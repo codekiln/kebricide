@@ -39,20 +39,21 @@ function getTracks() {
 function getClips(track: LiveAPI): LiveAPI[] {
   const clipSlots: LiveAPI[] = []
   const clipSlotCount = track.getcount('clip_slots')
-  // if you use track.path instead of track.unquotedpath, you get a path with
-  // quotes around it, which won't play well with the path extension below
   const basePath = track.unquotedpath
   
   for (let slotIndex = 0; slotIndex < clipSlotCount; slotIndex++) {
-    // Build complete path for this iteration
     const clipSlotPath = `${basePath} clip_slots ${slotIndex}`
     const clipSlot = new LiveAPI(() => {}, clipSlotPath)
     
-    // Check if slot has a clip
-    if (clipSlot && clipSlot.get('has_clip')) {
+    // Check if we got a valid object (id !== 0) before trying to use it
+    // see also https://docs.cycling74.com/legacy/max8/refpages/live.object#Messages
+    if (clipSlot && clipSlot.id !== 0 && clipSlot.get('has_clip')) {
       const clipPath = `${clipSlotPath} clip`
       const clip = new LiveAPI(() => {}, clipPath)
-      clipSlots.push(clip)
+      // Also check if the clip object is valid
+      if (clip && clip.id !== 0) {
+        clipSlots.push(clip)
+      }
     }
   }
 
